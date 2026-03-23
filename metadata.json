@@ -1,0 +1,5 @@
+{
+  "name": "Echo TTS",
+  "description": "A modern text-to-speech application powered by Gemini 2.5 Flash TTS.",
+  "requestFramePermissions": []
+}
