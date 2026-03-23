@@ -17,7 +17,9 @@ import {
   History as HistoryIcon,
   Zap,
   Clock,
-  MessageSquare
+  MessageSquare,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -53,7 +55,21 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('echo_tts_theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  // Save theme to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('echo_tts_theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
 
   // Load history from localStorage on mount
   useEffect(() => {
@@ -207,38 +223,46 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] font-sans text-slate-900 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <header className="flex items-center justify-between mb-12">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-              <Volume2 className="text-white w-6 h-6" />
+    <div className={`${isDarkMode ? 'dark' : ''}`}>
+      <div className="min-h-screen bg-[#f8f9fa] dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-100 p-4 md:p-8 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <header className="flex items-center justify-between mb-12">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20">
+                <Volume2 className="text-white w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight dark:text-white">Echo TTS</h1>
+                <p className="text-slate-500 dark:text-slate-400 text-sm flex items-center gap-1">
+                  <Zap size={12} className="text-amber-500 fill-amber-500" />
+                  Optimized for Speed
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight">Echo TTS</h1>
-              <p className="text-slate-500 text-sm flex items-center gap-1">
-                <Zap size={12} className="text-amber-500 fill-amber-500" />
-                Optimized for Speed
-              </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-2 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-800"
+                title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              <button 
+                onClick={clearAll}
+                className="p-2 text-slate-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                title="Clear all"
+              >
+                <Trash2 size={20} />
+              </button>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={clearAll}
-              className="p-2 text-slate-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
-              title="Clear all"
-            >
-              <Trash2 size={20} />
-            </button>
-          </div>
-        </header>
+          </header>
 
         <main className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column: Input & Results (8 cols) */}
           <div className="lg:col-span-8 space-y-6">
-            <div className="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 relative overflow-hidden">
-              <div className="flex items-center gap-2 mb-4 text-slate-600 font-medium">
+            <div className="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 relative overflow-hidden">
+              <div className="flex items-center gap-2 mb-4 text-slate-600 dark:text-slate-400 font-medium">
                 <TypeIcon size={18} />
                 <span>Text Input</span>
               </div>
@@ -246,7 +270,7 @@ export default function App() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Type or paste your text here..."
-                className="w-full h-64 bg-transparent border-none focus:ring-0 text-lg resize-none placeholder:text-slate-300"
+                className="w-full h-64 bg-transparent border-none focus:ring-0 outline-none text-lg resize-none placeholder:text-slate-300 dark:placeholder:text-slate-600 dark:text-slate-200"
               />
               
               {/* Animated Loading Overlay */}
@@ -256,13 +280,13 @@ export default function App() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10"
+                    className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-10"
                   >
                     <div className="relative">
                       <motion.div 
                         animate={{ rotate: 360 }}
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        className="w-20 h-20 border-4 border-indigo-100 border-t-indigo-600 rounded-full"
+                        className="w-20 h-20 border-4 border-indigo-100 dark:border-slate-800 border-t-indigo-600 rounded-full"
                       />
                       <Volume2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-indigo-600" size={24} />
                     </div>
@@ -271,7 +295,7 @@ export default function App() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="mt-6 text-indigo-900 font-medium text-center px-4"
+                      className="mt-6 text-indigo-900 dark:text-indigo-300 font-medium text-center px-4"
                     >
                       {LOADING_MESSAGES[loadingMessageIndex]}
                     </motion.p>
@@ -279,8 +303,8 @@ export default function App() {
                 )}
               </AnimatePresence>
 
-              <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-100">
-                <span className="text-xs text-slate-400 font-mono">
+              <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">
                   {text.length} characters
                 </span>
                 <button
@@ -341,11 +365,11 @@ export default function App() {
                     </div>
                     <div className="flex-1 w-full">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-indigo-900">Generated Audio</span>
+                        <span className="text-sm font-medium text-indigo-900 dark:text-indigo-300">Generated Audio</span>
                         <a 
                           href={audioUrl} 
                           download="echo-speech.wav"
-                          className="text-indigo-600 hover:text-indigo-800 flex items-center gap-1 text-xs font-semibold uppercase tracking-wider"
+                          className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1 text-xs font-semibold uppercase tracking-wider"
                         >
                           <Download size={14} />
                           Download
@@ -355,7 +379,7 @@ export default function App() {
                         ref={audioRef}
                         src={audioUrl} 
                         controls 
-                        className="w-full h-10 custom-audio-player"
+                        className="w-full h-10 custom-audio-player dark:invert dark:hue-rotate-180"
                       />
                     </div>
                   </div>
@@ -367,14 +391,14 @@ export default function App() {
           {/* Right Column: Settings & History (4 cols) */}
           <div className="lg:col-span-4 space-y-6">
             {/* Settings */}
-            <div className="glass-card rounded-2xl p-6 shadow-sm border border-slate-200">
-              <div className="flex items-center gap-2 mb-6 text-slate-600 font-medium">
+            <div className="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2 mb-6 text-slate-600 dark:text-slate-400 font-medium">
                 <Settings2 size={18} />
                 <span>Voice Settings</span>
               </div>
               
               <div className="space-y-3">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   Select Voice
                 </label>
                 <div className="grid grid-cols-1 gap-2">
@@ -384,14 +408,14 @@ export default function App() {
                       onClick={() => setSelectedVoice(voice.id)}
                       className={`flex flex-col items-start p-3 rounded-xl border transition-all text-left ${
                         selectedVoice === voice.id
-                          ? 'bg-indigo-50 border-indigo-200 ring-1 ring-indigo-200'
-                          : 'bg-white border-slate-100 hover:border-slate-200'
+                          ? 'bg-indigo-50 border-indigo-200 ring-1 ring-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-500/50 dark:ring-indigo-500/50'
+                          : 'bg-white border-slate-100 hover:border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:hover:border-slate-600'
                       }`}
                     >
-                      <span className={`font-medium ${selectedVoice === voice.id ? 'text-indigo-700' : 'text-slate-700'}`}>
+                      <span className={`font-medium ${selectedVoice === voice.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'}`}>
                         {voice.name}
                       </span>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
                         {voice.description}
                       </span>
                     </button>
@@ -401,15 +425,15 @@ export default function App() {
             </div>
 
             {/* History */}
-            <div className="glass-card rounded-2xl p-6 shadow-sm border border-slate-200">
-              <div className="flex items-center gap-2 mb-4 text-slate-600 font-medium">
+            <div className="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2 mb-4 text-slate-600 dark:text-slate-400 font-medium">
                 <HistoryIcon size={18} />
                 <span>Recent Clips</span>
               </div>
               
               <div className="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
                 {history.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400">
+                  <div className="text-center py-8 text-slate-400 dark:text-slate-600">
                     <Clock size={32} className="mx-auto mb-2 opacity-20" />
                     <p className="text-xs">No history yet</p>
                   </div>
@@ -418,17 +442,17 @@ export default function App() {
                     <button
                       key={item.id}
                       onClick={() => playFromHistory(item)}
-                      className="w-full p-3 rounded-xl border border-slate-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/50 transition-all text-left group"
+                      className="w-full p-3 rounded-xl border border-slate-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/50 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700/50 dark:hover:border-indigo-500/50 transition-all text-left group"
                     >
                       <div className="flex justify-between items-start mb-1">
-                        <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-tighter">
+                        <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-tighter">
                           {item.voice}
                         </span>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500">
                           {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
                         {item.text}
                       </p>
                     </button>
@@ -458,7 +482,7 @@ export default function App() {
           </div>
         </main>
 
-        <footer className="mt-20 text-center text-slate-400 text-xs">
+        <footer className="mt-20 text-center text-slate-400 dark:text-slate-600 text-xs">
           <p>© {new Date().getFullYear()} Echo TTS • Built with Gemini AI • Optimized for Performance</p>
         </footer>
       </div>
@@ -486,5 +510,6 @@ export default function App() {
         }
       `}</style>
     </div>
+  </div>
   );
 }
