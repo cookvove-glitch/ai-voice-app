@@ -9,22 +9,36 @@
 body {
   background-color: #f9fafb;
   color: #111827;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.dark body {
-  background-color: #0f172a;
-  color: #f8fafc;
+  /* Transitions disabled to prevent layout "ghosting" in mobile WebViews */
+  transition: none;
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: background 0.3s ease, border-color 0.3s ease;
+  /* Safe fallback: High-opacity background with clean borders for depth */
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  /* Transitions removed to reduce rendering overhead in WebView */
+  transition: none;
 }
 
-.dark .glass-card {
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Progressive enhancement: Only apply blur if explicitly supported and stable */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass-card {
+    background-color: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* Ensure smooth interaction without complex filter recalculations */
+button, a {
+  transition: opacity 0.2s ease;
+}
+
+/* Fix for Android WebView flickering on heavy elements */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
